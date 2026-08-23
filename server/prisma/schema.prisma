@@ -1,0 +1,63 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String           @id @default(cuid())
+  name         String
+  email        String           @unique
+  passwordHash String
+  role         String           @default("ADMIN")
+  department   String?          @default("Enterprise Architecture")
+  avatar       String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  systems      SoftwareSystem[] @relation("CreatedByUser")
+
+  @@map("users")
+}
+
+model SoftwareSystem {
+  id                     String    @id @default(cuid())
+  systemId               String    @unique
+  name                   String
+  description            String
+  businessDomain         String    // Finance, HR, Sales, Operations, IT, Customer Service, Marketing, Other
+  domainOwner            String
+  ownerEmail             String
+  developmentTeam        String?
+  technologyStack        String    // e.g. "React, Node.js, PostgreSQL, Docker, AWS"
+  programmingLanguage    String?
+  framework              String?
+  database               String?
+  infrastructure         String?
+  repositoryUrl          String?
+  documentationUrl       String?
+  environment            String    @default("Production") // Production, Staging, Development, Testing
+  status                 String    @default("Active") // Active, Under Maintenance, Deprecated, Planned
+  criticality            String    @default("Medium") // Critical, High, Medium, Low
+  version                String?   @default("1.0.0")
+  deploymentDate         DateTime?
+  lastUpdated            DateTime  @default(now())
+  dependencies           String?
+  securityNotes          String?
+  complianceRequirements String?
+  notes                  String?
+  createdBy              String?
+  creator                User?     @relation("CreatedByUser", fields: [createdBy], references: [id], onDelete: SetNull)
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  @@index([status])
+  @@index([businessDomain])
+  @@index([criticality])
+  @@index([environment])
+  @@index([name])
+  @@index([systemId])
+  @@map("software_systems")
+}
